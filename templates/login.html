@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('auth.login.title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="container auth-shell">
+  <div class="auth-card">
+    <span class="eyebrow">{{ t('brand.name') }}</span>
+    <h1>{{ t('auth.login.title') }}</h1>
+    <p class="auth-sub">{{ t('auth.login.subtitle') }}</p>
+
+    {% if error %}
+      <div class="form-alert" role="alert">{{ t(error) }}</div>
+    {% endif %}
+
+    <form method="post" class="stack-form" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <div class="field">
+        <label for="student_id">{{ t('auth.field.student_id') }}</label>
+        <input class="input" id="student_id" name="student_id" type="text"
+               value="{{ request.form.get('student_id', '') }}"
+               autocomplete="username" required>
+      </div>
+
+      <div class="field">
+        <label for="password">{{ t('auth.field.password') }}</label>
+        <input class="input" id="password" name="password" type="password"
+               autocomplete="current-password" required>
+      </div>
+
+      <button class="btn btn--primary btn--block" type="submit">
+        {{ t('auth.login.submit') }}
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      {{ t('auth.login.no_account') }}
+      <a href="{{ url_for('auth.register') }}">{{ t('nav.register') }}</a>
+    </p>
+    <p class="auth-hint">{{ t('auth.login.hint') }}</p>
+  </div>
+
+  <aside class="auth-side" aria-hidden="true">
+    <img class="auth-side__mark" src="{{ url_for('static', filename='img/logo.svg') }}" alt="">
+    <h2>{{ t('brand.tagline') }}</h2>
+    <div class="auth-side__chips">
+      <span class="status-chip status-chip--on_sale">{{ status_label('on_sale') }}</span>
+      <span class="status-chip status-chip--sold">{{ status_label('sold') }}</span>
+      <span class="status-chip status-chip--unavailable">{{ status_label('unavailable') }}</span>
+    </div>
+  </aside>
+</section>
+{% endblock %}

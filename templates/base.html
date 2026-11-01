@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ 'en' if locale == 'en' else 'zh-CN' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t('brand.name') }} · {{ t('brand.tagline') }}{% endblock %}</title>
+  <meta name="description" content="{{ t('home.hero.subtitle') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">{{ t('common.skip') }}</a>
+  {% include "partials/nav.html" %}
+  <div class="flash-stack" aria-live="polite">
+    {% include "partials/flash.html" %}
+  </div>
+  <main id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+  {% include "partials/footer.html" %}
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

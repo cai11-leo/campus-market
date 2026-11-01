@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "partials/category_card.html" import category_card %}
+
+{% block title %}{{ t('categories.title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{{ t('categories.title') }}</h1>
+    <p>{{ t('categories.subtitle') }}</p>
+  </div>
+</section>
+
+<section class="container section section--last">
+  <div class="category-grid">
+    {% for cat in categories %}
+      {{ category_card(cat) }}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

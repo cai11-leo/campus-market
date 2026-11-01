@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('auth.register.title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="container auth-shell">
+  <div class="auth-card auth-card--wide">
+    <span class="eyebrow">{{ t('brand.name') }}</span>
+    <h1>{{ t('auth.register.title') }}</h1>
+    <p class="auth-sub">{{ t('auth.register.subtitle') }}</p>
+
+    <form method="post" class="stack-form" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-row">
+        <div class="field">
+          <label for="student_id">{{ t('auth.field.student_id') }}</label>
+          <input class="input" id="student_id" name="student_id" type="text"
+                 value="{{ request.form.get('student_id', '') }}"
+                 autocomplete="username" required>
+          {% if errors.student_id %}<p class="field-error">{{ t(errors.student_id) }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="username">{{ t('auth.field.username') }}</label>
+          <input class="input" id="username" name="username" type="text"
+                 value="{{ request.form.get('username', '') }}"
+                 autocomplete="nickname" required>
+          {% if errors.username %}<p class="field-error">{{ t(errors.username) }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="password">{{ t('auth.field.password') }}</label>
+          <input class="input" id="password" name="password" type="password"
+                 autocomplete="new-password" required>
+          {% if errors.password %}<p class="field-error">{{ t(errors.password) }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="confirm_password">{{ t('auth.field.confirm_password') }}</label>
+          <input class="input" id="confirm_password" name="confirm_password" type="password"
+                 autocomplete="new-password" required>
+          {% if errors.confirm_password %}<p class="field-error">{{ t(errors.confirm_password) }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="contact_wechat">{{ t('auth.field.wechat') }} <span class="label-note">{{ t('auth.field.optional') }}</span></label>
+          <input class="input" id="contact_wechat" name="contact_wechat" type="text"
+                 value="{{ request.form.get('contact_wechat', '') }}">
+        </div>
+        <div class="field">
+          <label for="contact_phone">{{ t('auth.field.phone') }} <span class="label-note">{{ t('auth.field.optional') }}</span></label>
+          <input class="input" id="contact_phone" name="contact_phone" type="tel"
+                 value="{{ request.form.get('contact_phone', '') }}">
+        </div>
+      </div>
+      <p class="field-hint">{{ t('auth.contact_hint') }}</p>
+      {% if errors.contact %}<p class="field-error">{{ t(errors.contact) }}</p>{% endif %}
+
+      <button class="btn btn--primary btn--block" type="submit">
+        {{ t('auth.register.submit') }}
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      {{ t('auth.register.have_account') }}
+      <a href="{{ url_for('auth.login') }}">{{ t('nav.login') }}</a>
+    </p>
+  </div>
+
+  <aside class="auth-side" aria-hidden="true">
+    <img class="auth-side__mark" src="{{ url_for('static', filename='img/logo.svg') }}" alt="">
+    <h2>{{ t('brand.tagline') }}</h2>
+    <p>{{ t('auth.register.subtitle') }}</p>
+    <div class="auth-side__chips">
+      <span class="status-chip status-chip--on_sale">{{ status_label('on_sale') }}</span>
+      <span class="status-chip status-chip--sold">{{ status_label('sold') }}</span>
+      <span class="status-chip status-chip--unavailable">{{ status_label('unavailable') }}</span>
+    </div>
+  </aside>
+</section>
+{% endblock %}

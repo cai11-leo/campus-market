@@ -1,0 +1,63 @@
+<header class="site-nav">
+  <div class="container nav-inner">
+    <a class="brand" href="{{ url_for('main.index') }}" aria-label="{{ t('brand.name') }}">
+      <img class="brand-mark" src="{{ url_for('static', filename='img/logo.svg') }}" alt="">
+      <span class="brand-text">{{ t('brand.name') }}</span>
+    </a>
+
+    <button class="nav-toggle" type="button" data-nav-toggle
+            aria-expanded="false" aria-controls="primary-nav"
+            aria-label="{{ t('nav.menu') }}">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="nav-links" id="primary-nav" aria-label="{{ t('nav.primary') }}">
+      <a class="nav-link {{ 'is-active' if request.endpoint == 'main.index' }}"
+         href="{{ url_for('main.index') }}">{{ t('nav.home') }}</a>
+      <a class="nav-link {{ 'is-active' if request.endpoint in ('items.list_items', 'items.category') }}"
+         href="{{ url_for('items.list_items') }}">{{ t('nav.items') }}</a>
+      <a class="nav-link {{ 'is-active' if request.endpoint == 'main.categories' }}"
+         href="{{ url_for('main.categories') }}">{{ t('nav.categories') }}</a>
+      {% if current_user %}
+        <a class="nav-link {{ 'is-active' if request.endpoint == 'items.publish' }}"
+           href="{{ url_for('items.publish') }}">{{ t('nav.publish') }}</a>
+        <a class="nav-link {{ 'is-active' if request.endpoint == 'account.my_items' }}"
+           href="{{ url_for('account.my_items') }}">{{ t('nav.my_items') }}</a>
+        <a class="nav-link {{ 'is-active' if request.endpoint == 'account.profile' }}"
+           href="{{ url_for('account.profile') }}">{{ t('nav.profile') }}</a>
+        {% if current_user.role == 'admin' %}
+          <a class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.') }}"
+             href="{{ url_for('admin.dashboard') }}">{{ t('nav.admin') }}</a>
+        {% endif %}
+      {% endif %}
+      <div class="nav-lang-mobile">
+        <a href="{{ url_for('main.set_language', lang='zh', next=request.full_path.rstrip('?')) }}"
+           class="{{ 'is-active' if locale == 'zh' }}">中文</a>
+        <span class="lang-divider">/</span>
+        <a href="{{ url_for('main.set_language', lang='en', next=request.full_path.rstrip('?')) }}"
+           class="{{ 'is-active' if locale == 'en' }}">EN</a>
+      </div>
+    </nav>
+
+    <div class="nav-actions">
+      <div class="lang-switch" aria-label="{{ t('nav.language') }}">
+        <a href="{{ url_for('main.set_language', lang='zh', next=request.full_path.rstrip('?')) }}"
+           class="{{ 'is-active' if locale == 'zh' }}">中文</a>
+        <span class="lang-divider">/</span>
+        <a href="{{ url_for('main.set_language', lang='en', next=request.full_path.rstrip('?')) }}"
+           class="{{ 'is-active' if locale == 'en' }}">EN</a>
+      </div>
+
+      {% if current_user %}
+        <a class="nav-user" href="{{ url_for('account.profile') }}">{{ current_user.username }}</a>
+        <form class="inline-form" method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="nav-logout" type="submit">{{ t('nav.logout') }}</button>
+        </form>
+      {% else %}
+        <a class="nav-link nav-login" href="{{ url_for('auth.login') }}">{{ t('nav.login') }}</a>
+        <a class="btn btn--primary btn--small" href="{{ url_for('auth.register') }}">{{ t('nav.register') }}</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

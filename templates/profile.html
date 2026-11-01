@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('account.profile_title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{{ t('account.profile_title') }}</h1>
+    <p>{{ current_user.username }} · {{ t('account.contact_hint') }}</p>
+  </div>
+</section>
+
+<section class="container section--last">
+  <div class="profile-grid">
+    <div class="profile-card">
+      <form method="post" class="stack-form" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-row">
+          <div class="field">
+            <label for="student_id">{{ t('auth.field.student_id') }}</label>
+            <input class="input" id="student_id" type="text"
+                   value="{{ current_user.student_id }}" disabled>
+          </div>
+          <div class="field">
+            <label for="username">{{ t('auth.field.username') }}</label>
+            <input class="input" id="username" name="username" type="text"
+                   value="{{ request.form.get('username', current_user.username) }}"
+                   maxlength="30" required>
+            {% if errors.username %}<p class="field-error">{{ t(errors.username) }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="contact_wechat">{{ t('auth.field.wechat') }}</label>
+            <input class="input" id="contact_wechat" name="contact_wechat" type="text"
+                   value="{{ request.form.get('contact_wechat', current_user.contact_wechat or '') }}">
+          </div>
+          <div class="field">
+            <label for="contact_phone">{{ t('auth.field.phone') }}</label>
+            <input class="input" id="contact_phone" name="contact_phone" type="tel"
+                   value="{{ request.form.get('contact_phone', current_user.contact_phone or '') }}">
+          </div>
+        </div>
+        {% if errors.contact %}<p class="field-error">{{ t(errors.contact) }}</p>{% endif %}
+
+        <div class="profile-section">
+          <h2>{{ t('account.section.password') }}</h2>
+          <p class="field-hint">{{ t('account.password_hint') }}</p>
+        </div>
+
+        <div class="field">
+          <label for="current_password">{{ t('account.field.current_password') }}</label>
+          <input class="input" id="current_password" name="current_password"
+                 type="password" autocomplete="current-password">
+          {% if errors.current_password %}<p class="field-error">{{ t(errors.current_password) }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="new_password">{{ t('account.field.new_password') }}</label>
+            <input class="input" id="new_password" name="new_password"
+                   type="password" autocomplete="new-password">
+            {% if errors.new_password %}<p class="field-error">{{ t(errors.new_password) }}</p>{% endif %}
+          </div>
+          <div class="field">
+            <label for="confirm_password">{{ t('auth.field.confirm_password') }}</label>
+            <input class="input" id="confirm_password" name="confirm_password"
+                   type="password" autocomplete="new-password">
+          </div>
+        </div>
+
+        <button class="btn btn--primary" type="submit">{{ t('items.submit.save') }}</button>
+      </form>
+    </div>
+
+    <aside class="profile-aside">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stats.listings }}</span>
+          <span class="stat-card__label">{{ t('account.stats.listings') }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stats.favorites }}</span>
+          <span class="stat-card__label">{{ t('account.stats.favorites') }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stats.sold }}</span>
+          <span class="stat-card__label">{{ t('account.stats.sold') }}</span>
+        </div>
+      </div>
+
+      <div class="profile-links">
+        <a class="btn btn--ghost btn--block" href="{{ url_for('account.my_items') }}">{{ t('account.my_items_title') }}</a>
+        <a class="btn btn--ghost btn--block" href="{{ url_for('account.favorites') }}">{{ t('account.favorites_title') }}</a>
+        <a class="btn btn--ghost btn--block" href="{{ url_for('account.history') }}">{{ t('account.history_title') }}</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

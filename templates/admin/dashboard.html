@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin.nav.dashboard') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="container admin-shell">
+  {% include "partials/admin_nav.html" %}
+
+  <div class="admin-main">
+    <div class="admin-head">
+      <h1>{{ t('admin.nav.dashboard') }}</h1>
+      <p>{{ t('admin.dashboard.hint') }}</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.users }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.users') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.items_total }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.items') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.on_sale }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.on_sale') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.sold }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.sold') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.unavailable }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.unavailable') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.views }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.views') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.pending_reports }}</span>
+        <span class="admin-stat__label">{{ t('admin.stats.pending_reports') }}</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value">{{ stats.removed_admin }} / {{ stats.removed_seller }}</span>
+        <span class="admin-stat__label">{{ t('admin.removed.admin') }} / {{ t('admin.removed.seller') }}</span>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <h2>{{ t('admin.distribution') }}</h2>
+      {% for cat in stats.category_counts %}
+        <div class="bar-row">
+          <span>{{ category_name(cat) }}</span>
+          <span class="bar-track">
+            <span class="bar-fill"
+                  style="width: {{ ((cat.item_count / stats.max_category) * 100)|round|int }}%"></span>
+          </span>
+          <strong>{{ cat.item_count }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

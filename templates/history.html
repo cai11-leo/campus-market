@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "partials/item_card.html" import item_card %}
+{% from "partials/empty_state.html" import empty_state %}
+
+{% block title %}{{ t('account.history_title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{{ t('account.history_title') }}</h1>
+    <p>{{ t('items.count', count=items|length) }}</p>
+  </div>
+</section>
+
+<section class="container section--last">
+  {% if items %}
+    <div class="item-grid">
+      {% for item in items %}
+        {{ item_card(item) }}
+      {% endfor %}
+    </div>
+  {% else %}
+    {{ empty_state(t('account.history_empty'), None, '/items', t('home.hero.browse')) }}
+  {% endif %}
+</section>
+{% endblock %}

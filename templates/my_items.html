@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% from "partials/pagination.html" import pagination_nav %}
+{% from "partials/empty_state.html" import empty_state %}
+
+{% block title %}{{ t('account.my_items_title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{{ t('account.my_items_title') }}</h1>
+    <p>{{ t('items.count', count=result.total) }}</p>
+  </div>
+</section>
+
+<section class="container section--last">
+  <div class="status-tabs">
+    <a class="status-tab {{ 'is-active' if not status }}" href="{{ url_for('account.my_items') }}">{{ t('items.all') }}</a>
+    {% for value in ['on_sale', 'sold', 'unavailable'] %}
+      <a class="status-tab {{ 'is-active' if status == value }}"
+         href="{{ url_for('account.my_items', status=value) }}">{{ status_label(value) }}</a>
+    {% endfor %}
+  </div>
+
+  {% if result["items"] %}
+    <div class="manage-list">
+      {% for item in result["items"] %}
+        <article class="manage-row {{ 'is-removed' if item.is_removed }}">
+          <div class="manage-row__media">
+            {% if item.cover %}
+              <img src="{{ url_for('static', filename=item.cover) }}" alt="{{ item.title }}">
+            {% else %}
+              <div class="item-card__noimage">{{ category_name(item) }}</div>
+            {% endif %}
+          </div>
+
+          <div class="manage-row__body">
+            <div class="manage-row__title">
+              <a href="{{ url_for('items.detail', item_id=item.id) }}">{{ item.title }}</a>
+              <span class="status-chip status-chip--{{ item.status }}">{{ status_label(item.status) }}</span>
+              {% if item.is_removed %}
+                <span class="removed-tag">{{ t('item.removed_label') }}</span>
+              {% endif %}
+            </div>
+            <p class="meta">
+              <span class="price">{{ money(item.price) }}</span>
+              <span class="meta-dot">·</span>
+              <span>{{ category_name(item) }}</span>
+              <span class="meta-dot">·</span>
+              <span>{{ dt(item.created_at) }}</span>
+              <span class="meta-dot">·</span>
+              <span>{{ t('item.views', count=item.view_count) }}</span>
+            </p>
+            {% if item.is_removed %}
+              <p class="field-error">{{ t('item.removed_reason') }}: {{ item.removed_reason or '—' }}</p>
+            {% endif %}
+          </div>
+
+          <div class="manage-row__actions">
+            {% if not item.is_removed %}
+              <a class="btn btn--ghost btn--small"
+                 href="{{ url_for('items.edit', item_id=item.id) }}">{{ t('items.edit') }}</a>
+
+              <form class="status-form" method="post"
+                    action="{{ url_for('items.update_status', item_id=item.id) }}"
+                    data-confirm="{{ t('items.confirm_status') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ url_for('account.my_items') }}">
+                <select class="select" name="status" aria-label="{{ t('items.filter.status') }}">
+                  {% for value in ['on_sale', 'sold', 'unavailable'] %}
+                    <option value="{{ value }}" {% if item.status == value %}selected{% endif %}>
+                      {{ status_label(value) }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn--primary btn--small" type="submit">{{ t('items.status_control') }}</button>
+              </form>
+
+              <form method="post" action="{{ url_for('items.delete', item_id=item.id) }}"
+                    data-confirm="{{ t('items.confirm_delete') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn--danger btn--small" type="submit">{{ t('items.delete') }}</button>
+              </form>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    {{ pagination_nav(result.page, result.pages) }}
+  {% else %}
+    {{ empty_state(t('account.my_items_empty'), None, '/publish', t('home.hero.publish')) }}
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% from "partials/pagination.html" import pagination_nav %}
+
+{% block title %}{{ t('admin.items.title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="container admin-shell">
+  {% include "partials/admin_nav.html" %}
+
+  <div class="admin-main">
+    <div class="admin-head">
+      <h1>{{ t('admin.items.title') }}</h1>
+      <p>{{ t('admin.items.hint') }}</p>
+    </div>
+
+    <form class="admin-filter" method="get" action="{{ url_for('admin.items') }}">
+      <div class="filter-bar__search">
+        <label class="sr-only" for="q">{{ t('common.search') }}</label>
+        <input class="input" id="q" name="q" type="search"
+               value="{{ filters.q }}" placeholder="{{ t('items.search_placeholder') }}">
+      </div>
+      <div class="filter-bar__field">
+        <label for="category">{{ t('items.filter.category') }}</label>
+        <select class="select" id="category" name="category">
+          <option value="">{{ t('items.all') }}</option>
+          {% for cat in categories %}
+            <option value="{{ cat.slug }}" {% if filters.category == cat.slug %}selected{% endif %}>{{ category_name(cat) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-bar__field">
+        <label for="status">{{ t('items.filter.status') }}</label>
+        <select class="select" id="status" name="status">
+          <option value="">{{ t('items.all') }}</option>
+          <option value="on_sale" {% if filters.status == 'on_sale' %}selected{% endif %}>{{ status_label('on_sale') }}</option>
+          <option value="sold" {% if filters.status == 'sold' %}selected{% endif %}>{{ status_label('sold') }}</option>
+          <option value="unavailable" {% if filters.status == 'unavailable' %}selected{% endif %}>{{ status_label('unavailable') }}</option>
+        </select>
+      </div>
+      <div class="filter-bar__field">
+        <label for="removed">{{ t('admin.filter.removed') }}</label>
+        <select class="select" id="removed" name="removed">
+          <option value="">{{ t('admin.removed.all') }}</option>
+          <option value="none" {% if filters.removed == 'none' %}selected{% endif %}>{{ t('admin.removed.none') }}</option>
+          <option value="admin" {% if filters.removed == 'admin' %}selected{% endif %}>{{ t('admin.removed.admin') }}</option>
+          <option value="seller" {% if filters.removed == 'seller' %}selected{% endif %}>{{ t('admin.removed.seller') }}</option>
+        </select>
+      </div>
+      <button class="btn btn--primary" type="submit">{{ t('items.filter.submit') }}</button>
+    </form>
+
+    <div class="admin-panel">
+      {% if result["items"] %}
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>{{ t('admin.table.item') }}</th>
+                <th>{{ t('admin.table.seller') }}</th>
+                <th>{{ t('admin.table.price') }}</th>
+                <th>{{ t('admin.table.status') }}</th>
+                <th>{{ t('admin.table.removal') }}</th>
+                <th>{{ t('admin.table.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in result["items"] %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('items.detail', item_id=item.id) }}">{{ item.title }}</a>
+                    <div class="meta">{{ category_name(item) }}</div>
+                  </td>
+                  <td>{{ item.seller_name }}</td>
+                  <td>{{ money(item.price) }}</td>
+                  <td><span class="status-chip status-chip--{{ item.status }}">{{ status_label(item.status) }}</span></td>
+                  <td>
+                    {% if item.is_removed %}
+                      <span class="removed-tag">{{ t('admin.removed.' + item.removed_by) }}</span>
+                      {% if item.removed_reason and item.removed_reason != 'seller_deleted' %}
+                        <div class="meta">{{ item.removed_reason }}</div>
+                      {% endif %}
+                    {% else %}
+                      <span class="meta">—</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not item.is_removed %}
+                      <form class="inline-action" method="post"
+                            action="{{ url_for('admin.remove_item', item_id=item.id) }}"
+                            data-confirm="{{ t('admin.confirm_remove') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input class="input" name="reason" type="text"
+                               placeholder="{{ t('admin.reason_placeholder') }}" maxlength="200" required>
+                        <button class="btn btn--danger btn--small" type="submit">{{ t('admin.action.remove') }}</button>
+                      </form>
+                    {% elif item.removed_by == 'admin' %}
+                      <form method="post" action="{{ url_for('admin.restore_item', item_id=item.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn--ghost btn--small" type="submit">{{ t('admin.action.restore') }}</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {{ pagination_nav(result.page, result.pages) }}
+      {% else %}
+        <p class="empty-state__hint">{{ t('admin.items.empty') }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

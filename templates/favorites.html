@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "partials/empty_state.html" import empty_state %}
+
+{% block title %}{{ t('account.favorites_title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{{ t('account.favorites_title') }}</h1>
+    <p>{{ t('items.count', count=favorites|length) }}</p>
+  </div>
+</section>
+
+<section class="container section--last">
+  {% if favorites %}
+    <div class="favorite-grid">
+      {% for entry in favorites %}
+        {% set item = entry["item"] %}
+        {% set state = entry["state"] %}
+        <article class="favorite-card {{ 'is-invalid' if state != 'available' }}">
+          <div class="favorite-card__media">
+            {% if item.cover %}
+              {% if state in ('available', 'sold') %}
+                <a href="{{ url_for('items.detail', item_id=item.id) }}">
+                  <img src="{{ url_for('static', filename=item.cover) }}" alt="{{ item.title }}">
+                </a>
+              {% else %}
+                <img src="{{ url_for('static', filename=item.cover) }}" alt="{{ item.title }}">
+              {% endif %}
+            {% else %}
+              <div class="item-card__noimage">{{ category_name(item) }}</div>
+            {% endif %}
+
+            {% if state == 'invalid' %}
+              <span class="status-chip status-chip--sold">{{ t('account.favorite_invalid') }}</span>
+            {% else %}
+              <span class="status-chip status-chip--{{ item.status }}">{{ status_label(item.status) }}</span>
+            {% endif %}
+          </div>
+
+          <div class="favorite-card__body">
+            <h3>
+              {% if state in ('available', 'sold') %}
+                <a href="{{ url_for('items.detail', item_id=item.id) }}">{{ item.title }}</a>
+              {% else %}
+                {{ item.title }}
+              {% endif %}
+            </h3>
+            <p class="price">{{ money(item.price) }}</p>
+            <p class="meta">{{ category_name(item) }} · {{ condition_label(item.condition) }}</p>
+
+            <form method="post" action="{{ url_for('items.toggle_favorite', item_id=item.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="next" value="{{ url_for('account.favorites') }}">
+              <button class="btn btn--ghost btn--small btn--block" type="submit">
+                {{ t('account.remove_favorite') }}
+              </button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    {{ empty_state(t('account.favorites_empty'), None, '/items', t('home.hero.browse')) }}
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('items.edit_title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <h1>{{ t('items.edit_title') }}</h1>
+    <p>{{ item.title }}</p>
+  </div>
+</section>
+
+<section class="container section--last">
+  <form class="editor-grid" method="post" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="editor-main">
+      <div class="editor-card">
+        <div class="field">
+          <label for="title">{{ t('items.field.title') }} <span class="required">*</span></label>
+          <input class="input" id="title" name="title" type="text"
+                 value="{{ values.title }}" maxlength="60" required>
+          {% if errors.title %}<p class="field-error">{{ t(errors.title) }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="category_id">{{ t('items.field.category') }} <span class="required">*</span></label>
+            <select class="select" id="category_id" name="category_id" required>
+              <option value="">{{ t('items.filter.category') }}</option>
+              {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if values.category_id|int == cat.id %}selected{% endif %}>
+                  {{ category_name(cat) }}
+                </option>
+              {% endfor %}
+            </select>
+            {% if errors.category_id %}<p class="field-error">{{ t(errors.category_id) }}</p>{% endif %}
+          </div>
+          <div class="field">
+            <label for="condition">{{ t('items.field.condition') }}</label>
+            <select class="select" id="condition" name="condition">
+              <option value="">{{ t('items.field.none') }}</option>
+              <option value="new" {% if values.condition == 'new' %}selected{% endif %}>{{ condition_label('new') }}</option>
+              <option value="like_new" {% if values.condition == 'like_new' %}selected{% endif %}>{{ condition_label('like_new') }}</option>
+              <option value="good" {% if values.condition == 'good' %}selected{% endif %}>{{ condition_label('good') }}</option>
+              <option value="fair" {% if values.condition == 'fair' %}selected{% endif %}>{{ condition_label('fair') }}</option>
+            </select>
+            {% if errors.condition %}<p class="field-error">{{ t(errors.condition) }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="price">{{ t('items.field.price') }} <span class="required">*</span></label>
+            <input class="input" id="price" name="price" type="number"
+                   min="0" max="99999" step="0.01" value="{{ values.price }}" required>
+            {% if errors.price %}<p class="field-error">{{ t(errors.price) }}</p>{% endif %}
+          </div>
+          <div class="field">
+            <label for="original_price">{{ t('items.field.original_price') }}</label>
+            <input class="input" id="original_price" name="original_price" type="number"
+                   min="0" max="99999" step="0.01" value="{{ values.original_price }}">
+            {% if errors.original_price %}<p class="field-error">{{ t(errors.original_price) }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="trade_location">{{ t('items.field.location') }}</label>
+          <input class="input" id="trade_location" name="trade_location" type="text"
+                 value="{{ values.trade_location }}" maxlength="60"
+                 list="trade-locations" placeholder="{{ t('items.field.location_hint') }}">
+          <datalist id="trade-locations">
+            <option value="{{ t('items.location.dorm') }}"></option>
+            <option value="{{ t('items.location.canteen1') }}"></option>
+            <option value="{{ t('items.location.canteen2') }}"></option>
+            <option value="{{ t('items.location.teaching') }}"></option>
+            <option value="{{ t('items.location.library') }}"></option>
+          </datalist>
+          {% if errors.trade_location %}<p class="field-error">{{ t(errors.trade_location) }}</p>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="description">{{ t('items.field.description') }} <span class="required">*</span></label>
+          <textarea class="textarea" id="description" name="description"
+                    maxlength="2000" required>{{ values.description }}</textarea>
+          {% if errors.description %}<p class="field-error">{{ t(errors.description) }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <div class="editor-card__head">
+          <h2>{{ t('items.existing_images') }}</h2>
+          <span class="field-hint">{{ t('items.field.images_hint') }}</span>
+        </div>
+
+        <div class="existing-images">
+          {% for image in images %}
+            <label class="existing-image">
+              <img src="{{ url_for('static', filename=image.filename) }}" alt="">
+              <span class="existing-image__remove">
+                <input type="checkbox" name="remove_images" value="{{ image.id }}">
+                {{ t('items.remove_image') }}
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+
+        <label class="upload-zone">
+          <input type="file" name="images" accept="image/jpeg,image/png,image/webp"
+                 multiple data-image-input>
+          <span class="upload-zone__icon" aria-hidden="true">+</span>
+          <span>{{ t('items.field.images_hint') }}</span>
+        </label>
+        <div class="image-preview" data-image-preview
+             data-remove-label="{{ t('items.remove_image') }}"></div>
+        {% if errors.images %}<p class="field-error">{{ t(errors.images) }}</p>{% endif %}
+      </div>
+    </div>
+
+    <aside class="editor-aside">
+      <div class="editor-card editor-card--sticky">
+        <h2>{{ t('items.edit_title') }}</h2>
+        <p class="field-hint">{{ t('items.field.status_note') }}</p>
+        <button class="btn btn--primary btn--block" type="submit">{{ t('items.submit.save') }}</button>
+        <a class="btn btn--ghost btn--block" href="{{ url_for('items.detail', item_id=item.id) }}">{{ t('common.cancel') }}</a>
+      </div>
+    </aside>
+  </form>
+</section>
+{% endblock %}

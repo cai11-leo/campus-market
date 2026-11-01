@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="container detail-shell">
+  <a class="back-link" href="{{ url_for('items.list_items') }}">&larr; {{ t('items.back_all') }}</a>
+
+  {% if mode == 'paused_public' %}
+    <div class="notice notice--warning">
+      <strong>{{ t('item.not_available') }}</strong>
+      <span>{{ t('item.paused_hint') }}</span>
+    </div>
+  {% elif mode == 'paused_owner' %}
+    <div class="notice notice--warning">
+      <strong>{{ t('item.not_available') }}</strong>
+      <span>{{ t('item.paused_owner_hint') }}</span>
+    </div>
+  {% elif mode == 'removed_admin' %}
+    <div class="notice notice--danger">
+      <strong>{{ t('item.removed_label') }}</strong>
+      <span>{{ t('item.removed_notice') }}</span>
+      {% if item.removed_reason %}<span>{{ t('item.removed_reason') }}: {{ item.removed_reason }}</span>{% endif %}
+    </div>
+  {% elif mode == 'removed_seller' %}
+    <div class="notice notice--danger">
+      <strong>{{ t('item.deleted_notice') }}</strong>
+    </div>
+  {% elif item.status == 'sold' %}
+    <div class="notice notice--muted">
+      <strong>{{ status_label('sold') }}</strong>
+      <span>{{ t('item.sold_notice') }}</span>
+    </div>
+  {% endif %}
+
+  <div class="detail-grid">
+    <div class="detail-gallery">
+      {% if images %}
+        <div class="detail-gallery__main">
+          <img id="detail-main-image"
+               src="{{ url_for('static', filename=images[0].filename) }}"
+               alt="{{ item.title }}">
+        </div>
+        {% if images|length > 1 %}
+          <div class="detail-gallery__thumbs">
+            {% for image in images %}
+              <button type="button"
+                      class="detail-thumb {{ 'is-active' if loop.first }}"
+                      data-image-src="{{ url_for('static', filename=image.filename) }}"
+                      aria-label="{{ item.title }} {{ loop.index }}">
+                <img src="{{ url_for('static', filename=image.filename) }}" alt="">
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="detail-gallery__empty">{{ t('item.no_images') }}</div>
+      {% endif %}
+    </div>
+
+    <div class="detail-info">
+      <div class="detail-info__top">
+        <span class="status-chip status-chip--{{ item.status }}">{{ status_label(item.status) }}</span>
+        {% if mode == 'paused_owner' and current_user.id == item.seller_id %}
+          <span class="detail-owner-tag">{{ t('item.owner_hint') }}</span>
+        {% endif %}
+      </div>
+
+      <h1>{{ item.title }}</h1>
+
+      <div class="detail-price">
+        <span class="price">{{ money(item.price) }}</span>
+        {% if item.original_price %}
+          <s>{{ t('item.original_price') }} {{ money(item.original_price) }}</s>
+        {% endif %}
+      </div>
+
+      <dl class="detail-meta">
+        <div>
+          <dt>{{ t('items.filter.category') }}</dt>
+          <dd><a href="{{ url_for('items.category', slug=item.category_slug) }}">{{ category_name(item) }}</a></dd>
+        </div>
+        <div>
+          <dt>{{ t('item.condition') }}</dt>
+          <dd>{{ condition_label(item.condition) }}</dd>
+        </div>
+        {% if item.trade_location %}
+          <div>
+            <dt>{{ t('item.location') }}</dt>
+            <dd>{{ item.trade_location }}</dd>
+          </div>
+        {% endif %}
+        <div>
+          <dt>{{ t('item.posted_label') }}</dt>
+          <dd>{{ dt(item.created_at) }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('item.views_label') }}</dt>
+          <dd>{{ view_count }}</dd>
+        </div>
+      </dl>
+
+      <div class="detail-description">
+        <h2>{{ t('item.description') }}</h2>
+        <p>{{ item.description }}</p>
+      </div>
+
+      <div class="seller-card">
+        <div class="seller-card__head">
+          <span class="seller-avatar">{{ item.seller_name[:1] }}</span>
+          <div>
+            <strong>{{ item.seller_name }}</strong>
+            <p>{{ t('item.seller') }}</p>
+          </div>
+        </div>
+
+        {% if contact_allowed %}
+          <div class="contact-block">
+            {% if item.contact_wechat %}
+              <p><span>{{ t('item.wechat') }}</span><strong>{{ item.contact_wechat }}</strong></p>
+            {% endif %}
+            {% if item.contact_phone %}
+              <p><span>{{ t('item.phone') }}</span><strong>{{ item.contact_phone }}</strong></p>
+            {% endif %}
+          </div>
+        {% elif not current_user and item.status == 'on_sale' and mode == 'full' %}
+          <a class="btn btn--primary btn--block"
+             href="{{ url_for('auth.login', next=request.path) }}">{{ t('item.login_to_contact') }}</a>
+        {% endif %}
+      </div>
+
+      {% set is_owner = current_user and current_user.id == item.seller_id %}
+
+      {% if current_user and mode == 'full' and (item.status == 'on_sale' or is_favorited) %}
+        <form class="detail-action" method="post"
+              action="{{ url_for('items.toggle_favorite', item_id=item.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button class="btn btn--ghost btn--block" type="submit">
+            {{ t('item.favorited') if is_favorited else t('item.favorite') }}
+          </button>
+        </form>
+      {% endif %}
+
+      {% if can_manage %}
+        <div class="owner-actions">
+          <a class="btn btn--ghost btn--small"
+             href="{{ url_for('items.edit', item_id=item.id) }}">{{ t('items.edit') }}</a>
+
+          {% if is_owner %}
+            <form class="status-form" method="post"
+                  action="{{ url_for('items.update_status', item_id=item.id) }}"
+                  data-confirm="{{ t('items.confirm_status') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <select class="select" name="status" aria-label="{{ t('items.filter.status') }}">
+                {% for value in ['on_sale', 'sold', 'unavailable'] %}
+                  <option value="{{ value }}" {% if item.status == value %}selected{% endif %}>
+                    {{ status_label(value) }}
+                  </option>
+                {% endfor %}
+              </select>
+              <button class="btn btn--primary btn--small" type="submit">{{ t('items.status_control') }}</button>
+            </form>
+
+            <form method="post" action="{{ url_for('items.delete', item_id=item.id) }}"
+                  data-confirm="{{ t('items.confirm_delete') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn--danger btn--small" type="submit">{{ t('items.delete') }}</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if current_user and current_user.id != item.seller_id and mode == 'full' and item.status in ('on_sale', 'sold') %}
+        <details class="report-box">
+          <summary>{{ t('items.report_title') }}</summary>
+          <form method="post" action="{{ url_for('items.report', item_id=item.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="report-reason">{{ t('items.report_reason') }}</label>
+            <textarea class="textarea" id="report-reason" name="reason"
+                      minlength="5" maxlength="200" required></textarea>
+            <button class="btn btn--danger btn--small" type="submit">{{ t('items.report_submit') }}</button>
+          </form>
+        </details>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

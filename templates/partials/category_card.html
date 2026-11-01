@@ -1,0 +1,12 @@
+{% from "partials/icons.html" import icon %}
+
+{% macro category_card(cat) %}
+<a class="category-card category-card--{{ cat.slug }}" href="{{ url_for('items.category', slug=cat.slug) }}">
+  <span class="category-card__icon">{{ icon(cat.icon, 26) }}</span>
+  <span class="category-card__body">
+    <span class="category-card__name">{{ category_name(cat) }}</span>
+    <span class="category-card__count">{{ t('categories.count', count=cat.visible_count) }}</span>
+  </span>
+  <span class="category-card__arrow" aria-hidden="true">&rarr;</span>
+</a>
+{% endmacro %}

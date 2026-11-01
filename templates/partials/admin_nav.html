@@ -1,0 +1,11 @@
+<aside class="admin-nav">
+  <p class="admin-nav__label">{{ t('admin.title') }}</p>
+  <a class="admin-nav__link {{ 'is-active' if request.endpoint == 'admin.dashboard' }}"
+     href="{{ url_for('admin.dashboard') }}">{{ t('admin.nav.dashboard') }}</a>
+  <a class="admin-nav__link {{ 'is-active' if request.endpoint == 'admin.items' }}"
+     href="{{ url_for('admin.items') }}">{{ t('admin.nav.items') }}</a>
+  <a class="admin-nav__link {{ 'is-active' if request.endpoint == 'admin.categories' }}"
+     href="{{ url_for('admin.categories') }}">{{ t('admin.nav.categories') }}</a>
+  <a class="admin-nav__link {{ 'is-active' if request.endpoint == 'admin.reports' }}"
+     href="{{ url_for('admin.reports') }}">{{ t('admin.nav.reports') }}</a>
+</aside>

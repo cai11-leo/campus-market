@@ -1,0 +1,30 @@
+{% macro item_card(item) %}
+<a class="item-card {{ 'is-sold' if item.status == 'sold' }}" href="/item/{{ item.id }}">
+  <div class="item-card__media">
+    {% if item.cover %}
+      <img src="{{ url_for('static', filename=item.cover) }}"
+           alt="{{ item.title }}" loading="lazy">
+    {% else %}
+      <div class="item-card__noimage">{{ category_name(item) }}</div>
+    {% endif %}
+    <span class="status-chip status-chip--{{ item.status }}">{{ status_label(item.status) }}</span>
+  </div>
+  <div class="item-card__body">
+    <h3>{{ item.title }}</h3>
+    <p class="price">
+      {{ money(item.price) }}
+      {% if item.original_price %}<s class="item-card__original">{{ money(item.original_price) }}</s>{% endif %}
+    </p>
+    <p class="meta">
+      <span>{{ category_name(item) }}</span>
+      <span class="meta-dot">·</span>
+      <span>{{ condition_label(item.condition) }}</span>
+    </p>
+    <p class="meta">
+      <span>{{ dt(item.created_at) }}</span>
+      <span class="meta-dot">·</span>
+      <span>{{ t('item.views', count=item.view_count) }}</span>
+    </p>
+  </div>
+</a>
+{% endmacro %}

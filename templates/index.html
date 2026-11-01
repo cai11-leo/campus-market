@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% from "partials/item_card.html" import item_card %}
+{% from "partials/category_card.html" import category_card %}
+{% from "partials/empty_state.html" import empty_state %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">{{ t('home.hero.eyebrow') }}</span>
+      <h1 class="hero-title"><span>{{ t('home.hero.title') }}</span></h1>
+      <p class="hero-subtitle">{{ t('home.hero.subtitle') }}</p>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="/items">{{ t('home.hero.browse') }}</a>
+        <a class="btn btn--ghost" href="/publish">{{ t('home.hero.publish') }}</a>
+      </div>
+      <div class="hero-stats">
+        <span><strong>{{ data.stats["items"] }}</strong>{{ t('home.stats.items') }}</span>
+        <span><strong>{{ data.stats.students }}</strong>{{ t('home.stats.students') }}</span>
+        <span><strong>{{ data.stats.sold }}</strong>{{ t('home.stats.sold') }}</span>
+      </div>
+    </div>
+
+    <aside class="hero-panel" aria-label="{{ t('home.hero.panel_title') }}">
+      <span class="hero-panel__pin" aria-hidden="true"></span>
+      <div class="hero-panel__head">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <h2>{{ t('home.hero.panel_title') }}</h2>
+      </div>
+      <p class="hero-panel__text">{{ t('home.hero.panel_text') }}</p>
+      <div class="status-demo">
+        <div class="status-demo__row">
+          <span class="status-chip status-chip--on_sale">{{ status_label('on_sale') }}</span>
+          <span class="status-demo__line"></span>
+        </div>
+        <div class="status-demo__row">
+          <span class="status-chip status-chip--sold">{{ status_label('sold') }}</span>
+          <span class="status-demo__line status-demo__line--muted"></span>
+        </div>
+        <div class="status-demo__row">
+          <span class="status-chip status-chip--unavailable">{{ status_label('unavailable') }}</span>
+          <span class="status-demo__line status-demo__line--amber"></span>
+        </div>
+      </div>
+      <p class="hero-panel__note">{{ t('home.hero.panel_note') }}</p>
+    </aside>
+  </div>
+</section>
+
+<section class="container">
+  <div class="carousel" data-carousel role="group"
+       aria-roledescription="carousel" aria-label="{{ t('home.carousel') }}">
+    <div class="carousel__slides">
+      <article class="carousel__slide is-active" data-slide>
+        <span class="carousel__index">01</span>
+        <h3>{{ t('home.slide1.title') }}</h3>
+        <p>{{ t('home.slide1.text') }}</p>
+      </article>
+      <article class="carousel__slide" data-slide>
+        <span class="carousel__index">02</span>
+        <h3>{{ t('home.slide2.title') }}</h3>
+        <p>{{ t('home.slide2.text') }}</p>
+      </article>
+      <article class="carousel__slide" data-slide>
+        <span class="carousel__index">03</span>
+        <h3>{{ t('home.slide3.title') }}</h3>
+        <p>{{ t('home.slide3.text') }}</p>
+      </article>
+    </div>
+    <div class="carousel__dots" role="group" aria-label="{{ t('home.slides') }}">
+      <button class="carousel__dot is-active" type="button" data-dot="0" aria-label="1"></button>
+      <button class="carousel__dot" type="button" data-dot="1" aria-label="2"></button>
+      <button class="carousel__dot" type="button" data-dot="2" aria-label="3"></button>
+    </div>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="section-head">
+    <div>
+      <h2>{{ t('home.categories') }}</h2>
+      <p>{{ t('home.categories_sub') }}</p>
+    </div>
+  </div>
+  {% if data.categories %}
+    <div class="category-grid">
+      {% for cat in data.categories %}
+        {{ category_card(cat) }}
+      {% endfor %}
+    </div>
+  {% else %}
+    {{ empty_state(t('home.empty')) }}
+  {% endif %}
+</section>
+
+<section class="container section">
+  <div class="section-head">
+    <div>
+      <h2>{{ t('home.latest') }}</h2>
+      <p>{{ t('home.latest_sub') }}</p>
+    </div>
+    <a class="text-link" href="/items">{{ t('common.view_all') }} &rarr;</a>
+  </div>
+  {% if data.latest %}
+    <div class="item-grid">
+      {% for item in data.latest %}
+        {{ item_card(item) }}
+      {% endfor %}
+    </div>
+  {% else %}
+    {{ empty_state(t('home.empty'), None, '/publish', t('home.hero.publish')) }}
+  {% endif %}
+</section>
+
+<section class="container section section--last">
+  <div class="section-head">
+    <div>
+      <h2>{{ t('home.popular') }}</h2>
+      <p>{{ t('home.popular_sub') }}</p>
+    </div>
+    <a class="text-link" href="/items">{{ t('common.view_all') }} &rarr;</a>
+  </div>
+  {% if data.popular %}
+    <div class="item-grid">
+      {% for item in data.popular %}
+        {{ item_card(item) }}
+      {% endfor %}
+    </div>
+  {% else %}
+    {{ empty_state(t('home.empty'), None, '/publish', t('home.hero.publish')) }}
+  {% endif %}
+</section>
+{% endblock %}

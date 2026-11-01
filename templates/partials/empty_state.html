@@ -1,0 +1,11 @@
+{% macro empty_state(title, hint=None, action_url=None, action_label=None) %}
+<div class="empty-state empty-state--stack">
+  <div class="empty-state__copy">
+    <p class="empty-state__title">{{ title }}</p>
+    {% if hint %}<p class="empty-state__hint">{{ hint }}</p>{% endif %}
+  </div>
+  {% if action_url %}
+    <a class="btn btn--ghost btn--small" href="{{ action_url }}">{{ action_label }}</a>
+  {% endif %}
+</div>
+{% endmacro %}

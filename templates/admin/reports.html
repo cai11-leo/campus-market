@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin.reports.title') }} · {{ t('brand.name') }}{% endblock %}
+
+{% block content %}
+<section class="container admin-shell">
+  {% include "partials/admin_nav.html" %}
+
+  <div class="admin-main">
+    <div class="admin-head">
+      <h1>{{ t('admin.reports.title') }}</h1>
+      <p>{{ t('admin.reports.hint') }}</p>
+    </div>
+
+    <div class="status-tabs">
+      {% for value in ['pending', 'resolved', 'dismissed'] %}
+        <a class="status-tab {{ 'is-active' if status == value }}"
+           href="{{ url_for('admin.reports', status=value) }}">
+          {{ t('admin.reports.status.' + value) }}
+        </a>
+      {% endfor %}
+      <a class="status-tab {{ 'is-active' if not status }}"
+         href="{{ url_for('admin.reports', status='') }}">{{ t('items.all') }}</a>
+    </div>
+
+    <div class="admin-panel">
+      {% if reports %}
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>{{ t('admin.reports.item') }}</th>
+                <th>{{ t('admin.reports.reason') }}</th>
+                <th>{{ t('admin.reports.reporter') }}</th>
+                <th>{{ t('admin.table.status') }}</th>
+                <th>{{ t('admin.table.time') }}</th>
+                <th>{{ t('admin.table.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in reports %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('items.detail', item_id=report.item_id) }}">{{ report.item_title }}</a>
+                  </td>
+                  <td>{{ report.reason }}</td>
+                  <td>{{ report.reporter_name }}</td>
+                  <td>
+                    <span class="status-chip
+                      {% if report.status == 'pending' %}status-chip--unavailable
+                      {% elif report.status == 'resolved' %}status-chip--on_sale
+                      {% else %}status-chip--sold{% endif %}">
+                      {{ t('admin.reports.status.' + report.status) }}
+                    </span>
+                  </td>
+                  <td>{{ dt(report.created_at) }}</td>
+                  <td>
+                    {% if report.status == 'pending' %}
+                      <div class="admin-actions">
+                        <form method="post" action="{{ url_for('admin.resolve_report', report_id=report.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button class="btn btn--ghost btn--small" type="submit">{{ t('admin.action.resolve') }}</button>
+                        </form>
+                        <form method="post" action="{{ url_for('admin.dismiss_report', report_id=report.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button class="btn btn--ghost btn--small" type="submit">{{ t('admin.action.dismiss') }}</button>
+                        </form>
+                        <form method="post" action="{{ url_for('admin.remove_reported_item', report_id=report.id) }}"
+                              data-confirm="{{ t('admin.confirm_remove_item') }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button class="btn btn--danger btn--small" type="submit">{{ t('admin.action.remove_item') }}</button>
+                        </form>
+                      </div>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state__hint">{{ t('admin.reports.empty') }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

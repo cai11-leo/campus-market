@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "partials/item_card.html" import item_card %}
+{% from "partials/pagination.html" import pagination_nav %}
+{% from "partials/empty_state.html" import empty_state %}
+
+{% block title %}
+  {% if active_category %}{{ category_name(active_category) }}{% else %}{{ t('items.title') }}{% endif %}
+  · {{ t('brand.name') }}
+{% endblock %}
+
+{% block content %}
+{% set selected_category = active_category.slug if active_category else filters.category %}
+
+<section class="page-head">
+  <div class="container">
+    {% if active_category %}
+      <a class="back-link" href="{{ url_for('items.list_items') }}">&larr; {{ t('items.back_all') }}</a>
+    {% endif %}
+    <div class="page-head__row">
+      <div>
+        <h1>{% if active_category %}{{ category_name(active_category) }}{% else %}{{ t('items.title') }}{% endif %}</h1>
+        <p>{{ t('items.count', count=result.total) }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <form class="filter-bar" method="get" action="{{ url_for('items.list_items') }}">
+    <div class="filter-bar__search">
+      <label class="sr-only" for="q">{{ t('common.search') }}</label>
+      <input class="input" id="q" name="q" type="search"
+             value="{{ filters.q }}" placeholder="{{ t('items.search_placeholder') }}">
+    </div>
+
+    <div class="filter-bar__field">
+      <label for="category">{{ t('items.filter.category') }}</label>
+      <select class="select" id="category" name="category">
+        <option value="">{{ t('items.all') }}</option>
+        {% for cat in categories %}
+          <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>
+            {{ category_name(cat) }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-bar__field">
+      <label for="status">{{ t('items.filter.status') }}</label>
+      <select class="select" id="status" name="status">
+        <option value="">{{ t('items.all') }}</option>
+        <option value="on_sale" {% if filters.status == 'on_sale' %}selected{% endif %}>{{ status_label('on_sale') }}</option>
+        <option value="sold" {% if filters.status == 'sold' %}selected{% endif %}>{{ status_label('sold') }}</option>
+      </select>
+    </div>
+
+    <div class="filter-bar__field">
+      <label for="sort">{{ t('items.filter.sort') }}</label>
+      <select class="select" id="sort" name="sort">
+        <option value="latest" {% if filters.sort == 'latest' %}selected{% endif %}>{{ t('sort.latest') }}</option>
+        <option value="price_asc" {% if filters.sort == 'price_asc' %}selected{% endif %}>{{ t('sort.price_asc') }}</option>
+        <option value="price_desc" {% if filters.sort == 'price_desc' %}selected{% endif %}>{{ t('sort.price_desc') }}</option>
+        <option value="views" {% if filters.sort == 'views' %}selected{% endif %}>{{ t('sort.views') }}</option>
+      </select>
+    </div>
+
+    <button class="btn btn--primary" type="submit">{{ t('items.filter.submit') }}</button>
+    <a class="filter-reset" href="{{ url_for('items.list_items') }}">{{ t('items.filter.reset') }}</a>
+  </form>
+</section>
+
+<section class="container section section--last">
+  {% if result["items"] %}
+    <div class="item-grid">
+      {% for item in result["items"] %}
+        {{ item_card(item) }}
+      {% endfor %}
+    </div>
+    {{ pagination_nav(result.page, result.pages) }}
+  {% else %}
+    {{ empty_state(t('items.empty'), t('items.empty_hint'), '/publish', t('home.hero.publish')) }}
+  {% endif %}
+</section>
+{% endblock %}

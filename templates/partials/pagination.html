@@ -1,0 +1,17 @@
+{% macro pagination_nav(page, pages) %}
+  {% if pages > 1 %}
+  <nav class="pagination" aria-label="{{ t('common.pagination') }}">
+    {% if page > 1 %}
+      <a class="pagination__step" href="{{ url_with_page(page - 1) }}" aria-label="{{ t('common.previous') }}">&lsaquo;</a>
+    {% endif %}
+    {% for p in range(1, pages + 1) %}
+      <a class="pagination__page {{ 'is-current' if p == page }}"
+         href="{{ url_with_page(p) }}"
+         {% if p == page %}aria-current="page"{% endif %}>{{ p }}</a>
+    {% endfor %}
+    {% if page < pages %}
+      <a class="pagination__step" href="{{ url_with_page(page + 1) }}" aria-label="{{ t('common.next') }}">&rsaquo;</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+{% endmacro %}
